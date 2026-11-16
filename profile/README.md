@@ -1,1 +1,1 @@
-# Standards-Aware Guidance Engine (S.A.G.E)
+# Governance Utility for Relational Units (G.U.R.U)
