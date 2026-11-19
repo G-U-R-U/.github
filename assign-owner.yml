@@ -1,0 +1,32 @@
+# Assigns the owner to every new or reopened issue and pull request, so they show up in the
+# owner's GitHub lists ("Assigned to me") whoever opened them. Dependabot PRs are skipped here:
+# workflows started by Dependabot get a read-only token, so if the repository uses Dependabot,
+# its dependabot.yml assigns those PRs with `assignees`.
+name: Assign the owner
+
+on:
+  issues:
+    types: [opened, reopened]
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions: {}
+
+jobs:
+  assign:
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      # No checkout: the job only calls the GitHub API and never runs code from the PR.
+      - name: Assign the owner
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+          OWNER: manouk-van-draanen
+        run: >-
+          gh api --method POST "repos/$REPO/issues/$NUMBER/assignees"
+          -f "assignees[]=$OWNER" --silent
