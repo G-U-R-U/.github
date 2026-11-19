@@ -1,0 +1,15 @@
+# Caller for this repository: scans the full history for secrets on every pull request and on
+# every push to main.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    uses: ./.github/workflows/gitleaks.yml

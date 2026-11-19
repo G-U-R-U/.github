@@ -1,0 +1,19 @@
+# Weekly update PRs for the actions pinned in the reusable workflows and callers, assigned to the
+# owner. Callers in other repositories pin these workflows by commit SHA, so an update reaches
+# them only after a new release here.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    # Workflows started by Dependabot can't assign anyone, so Dependabot does it itself.
+    assignees: ["manouk-van-draanen"]
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      # One PR for all action updates instead of one per action.
+      actions:
+        patterns: ["*"]

@@ -1,0 +1,39 @@
+# Reusable workflow: assigns the owner to the issue or pull request that started the caller, so it
+# shows up in the owner's GitHub lists ("Assigned to me") whoever opened it. The caller runs on
+# issues and pull_request_target (opened, reopened).
+# Issues and PRs created by another workflow with GITHUB_TOKEN don't trigger workflows, so such a
+# workflow must assign the owner itself.
+# Dependabot PRs are skipped: workflows started by Dependabot get a read-only token, so the
+# calling repository's dependabot.yml assigns those PRs with `assignees`.
+name: Assign the owner
+
+on:
+  workflow_call:
+    inputs:
+      owner:
+        description: GitHub login to assign.
+        type: string
+        default: manouk-van-draanen
+
+permissions: {}
+
+jobs:
+  assign:
+    # Skip only runs Dependabot started (read-only token); reopening its PR yourself still assigns.
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    # The caller's job must grant these too: a called workflow can't get more than its caller.
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      # No checkout: the job only calls the GitHub API and never runs code from the PR.
+      - name: Assign the owner
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+          OWNER: ${{ inputs.owner }}
+        run: >-
+          gh api --method POST "repos/$REPO/issues/$NUMBER/assignees"
+          -f "assignees[]=$OWNER" --silent
