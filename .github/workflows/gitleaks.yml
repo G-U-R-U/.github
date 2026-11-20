@@ -33,4 +33,7 @@ jobs:
             "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${archive}"
           echo "${GITLEAKS_SHA256}  ${archive}" | sha256sum --check --strict
           tar -xzf "$archive" gitleaks
-          ./gitleaks git --redact --no-banner --verbose "$GITHUB_WORKSPACE"
+          # gitleaks' default log options leave out the diffs of merge commits, so a secret added
+          # while resolving a merge would be missed. These are its defaults plus -m.
+          ./gitleaks git --redact --no-banner --verbose \
+            --log-opts="-m --all --full-history --diff-filter=tuxdb" "$GITHUB_WORKSPACE"
