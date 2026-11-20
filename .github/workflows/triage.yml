@@ -1,0 +1,26 @@
+# Caller for this repository: assigns the owner to new or reopened issues and pull requests, and
+# adds new or reopened pull requests to the project board. Uses the local copies of the reusable
+# workflows; other repositories call them pinned by commit SHA (see README.md).
+name: Triage
+
+on:
+  issues:
+    types: [opened, reopened]
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions: {}
+
+jobs:
+  assign-owner:
+    # A called workflow can't get more permissions than the job that calls it.
+    permissions:
+      issues: write
+      pull-requests: write
+    uses: ./.github/workflows/assign-owner.yml
+
+  add-to-project:
+    if: github.event_name == 'pull_request_target'
+    uses: ./.github/workflows/add-to-project.yml
+    secrets:
+      ADD_TO_PROJECT_PAT: ${{ secrets.ADD_TO_PROJECT_PAT }}
