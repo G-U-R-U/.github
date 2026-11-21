@@ -23,4 +23,5 @@ jobs:
     if: github.event_name == 'pull_request_target'
     uses: ./.github/workflows/add-to-project.yml
     secrets:
+      # This repository's copy of the shared fine-grained board token (see add-to-project.yml).
       ADD_TO_PROJECT_PAT: ${{ secrets.ADD_TO_PROJECT_PAT }}

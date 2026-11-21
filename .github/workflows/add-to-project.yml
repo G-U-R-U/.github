@@ -1,8 +1,10 @@
 # Reusable workflow: adds the pull request that started the caller to a G.U.R.U project board.
 # The caller runs on pull_request_target (opened, reopened) and passes the secret
-# ADD_TO_PROJECT_PAT: a classic personal access token with the repo and project scopes.
-# Organisation secrets don't reach private repositories on the Free plan, so each calling
-# repository holds its own copy.
+# ADD_TO_PROJECT_PAT: one fine-grained personal access token shared by every G-U-R-U repository
+# on the board (resource owner G-U-R-U, selected repositories only; Issues and Pull requests
+# read-only; organisation Projects read and write). Organisation secrets don't reach private
+# repositories on the Free plan, so each calling repository holds its own copy. A new repository
+# on the board needs adding to the token's repository list and its own secret.
 name: Add pull requests to project
 
 on:
@@ -14,7 +16,7 @@ on:
         default: https://github.com/orgs/G-U-R-U/projects/1
     secrets:
       ADD_TO_PROJECT_PAT:
-        description: Classic personal access token with the repo and project scopes.
+        description: Fine-grained personal access token with Issues and Pull requests read-only and organisation Projects read and write.
         required: true
 
 permissions: {}

@@ -12,7 +12,7 @@ secrets or internal details in it.
 
 | Workflow | What it does | Inputs | Secrets |
 | --- | --- | --- | --- |
-| `add-to-project.yml` | Adds the pull request to a project board. Skips Dependabot PRs. | `project-url` (default `https://github.com/orgs/G-U-R-U/projects/1`) | `ADD_TO_PROJECT_PAT` (required): classic token with the `repo` and `project` scopes |
+| `add-to-project.yml` | Adds the pull request to a project board. Skips Dependabot PRs. | `project-url` (default `https://github.com/orgs/G-U-R-U/projects/1`) | `ADD_TO_PROJECT_PAT` (required): fine-grained personal access token (resource owner G-U-R-U, selected repositories only; Issues and Pull requests read-only; organisation Projects read and write) |
 | `assign-owner.yml` | Assigns the owner to the issue or pull request. Skips runs Dependabot started. | `owner` (default `manouk-van-draanen`) | none |
 | `gitleaks.yml` | Scans the full Git history of the calling repository for secrets. | none | none |
 
@@ -21,6 +21,10 @@ Notes:
 - `assign-owner.yml` needs `issues: write` and `pull-requests: write`. The calling job must grant
   both, because a called workflow can't get more permissions than its caller.
 - Pass `ADD_TO_PROJECT_PAT` by name, not with `secrets: inherit`, so the workflow gets only that secret.
+- `ADD_TO_PROJECT_PAT` is one fine-grained personal access token shared by every G-U-R-U repository
+  on the board. Organisation secrets don't reach private repositories on the Free plan, so each
+  repository holds its own copy. A new repository on the board needs adding to the token's
+  repository list and its own secret.
 - Dependabot can't assign its own PRs through a workflow. Set `assignees` in the calling
   repository's `dependabot.yml`.
 
@@ -52,6 +56,7 @@ jobs:
     if: github.event_name == 'pull_request_target'
     uses: G-U-R-U/.github/.github/workflows/add-to-project.yml@<sha> # v1.0.0
     secrets:
+      # This repository's copy of the shared fine-grained board token.
       ADD_TO_PROJECT_PAT: ${{ secrets.ADD_TO_PROJECT_PAT }}
 ```
 
