@@ -10,17 +10,17 @@ secrets or internal details in it.
 
 ## Reusable workflows
 
-| Workflow | What it does | Inputs | Secrets |
-| --- | --- | --- | --- |
-| `add-to-project.yml` | Adds the pull request to a project board. Skips Dependabot PRs. | `project-url` (default `https://github.com/orgs/G-U-R-U/projects/1`) | `ADD_TO_PROJECT_PAT` (required): classic token with the `repo` and `project` scopes |
-| `assign-owner.yml` | Assigns the owner to the issue or pull request. Skips runs Dependabot started. | `owner` (default `manouk-van-draanen`) | none |
-| `gitleaks.yml` | Scans the full Git history of the calling repository for secrets. | none | none |
+| Workflow | What it does | Inputs |
+| --- | --- | --- |
+| `assign-owner.yml` | Assigns the owner to the issue or pull request. Skips runs Dependabot started. | `owner` (default `manouk-van-draanen`) |
+| `gitleaks.yml` | Scans the full Git history of the calling repository for secrets. | none |
+
+Neither workflow needs a secret from the caller.
 
 Notes:
 
 - `assign-owner.yml` needs `issues: write` and `pull-requests: write`. The calling job must grant
   both, because a called workflow can't get more permissions than its caller.
-- Pass `ADD_TO_PROJECT_PAT` by name, not with `secrets: inherit`, so the workflow gets only that secret.
 - Dependabot can't assign its own PRs through a workflow. Set `assignees` in the calling
   repository's `dependabot.yml`.
 
@@ -46,13 +46,7 @@ jobs:
     permissions:
       issues: write
       pull-requests: write
-    uses: G-U-R-U/.github/.github/workflows/assign-owner.yml@<sha> # v1.0.0
-
-  add-to-project:
-    if: github.event_name == 'pull_request_target'
-    uses: G-U-R-U/.github/.github/workflows/add-to-project.yml@<sha> # v1.0.0
-    secrets:
-      ADD_TO_PROJECT_PAT: ${{ secrets.ADD_TO_PROJECT_PAT }}
+    uses: G-U-R-U/.github/.github/workflows/assign-owner.yml@<sha> # v2.0.0
 ```
 
 ```yaml
@@ -61,10 +55,13 @@ jobs:
   gitleaks:
     permissions:
       contents: read
-    uses: G-U-R-U/.github/.github/workflows/gitleaks.yml@<sha> # v1.0.0
+    uses: G-U-R-U/.github/.github/workflows/gitleaks.yml@<sha> # v2.0.0
 ```
 
 ## Releases
 
 Releases are tagged `vMAJOR.MINOR.PATCH`. A breaking change, such as removing or renaming an
 input, bumps MAJOR.
+
+v2.0.0 removed `add-to-project.yml`: the organisation no longer adds pull requests to a project
+board automatically. Callers on v1.x that still call it must drop that job before moving to v2.0.0.
